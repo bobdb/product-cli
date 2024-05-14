@@ -4,6 +4,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import picocli.CommandLine.Spec;
+import picocli.CommandLine.Model.CommandSpec;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -15,6 +17,9 @@ import java.util.concurrent.Callable;
         description = "Prints the checksum (SHA-256 by default) of a file to STDOUT.")
 class CheckSum implements Callable<Integer> {
 
+    @Spec
+    CommandSpec spec;
+
     @Parameters(index = "0", description = "The file whose checksum to calculate.")
     private File file;
 
@@ -25,7 +30,7 @@ class CheckSum implements Callable<Integer> {
     public Integer call() throws Exception { // your business logic goes here...
         byte[] fileContents = Files.readAllBytes(file.toPath());
         byte[] digest = MessageDigest.getInstance(algorithm).digest(fileContents);
-        System.out.printf("%0" + (digest.length*2) + "x%n", new BigInteger(1, digest));
+        spec.commandLine().getOut().printf("%0" + (digest.length*2) + "x%n", new BigInteger(1, digest));
         return 0;
     }
 
