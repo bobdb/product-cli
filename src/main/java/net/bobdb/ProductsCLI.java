@@ -2,6 +2,7 @@ package net.bobdb;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
@@ -16,13 +17,64 @@ class ProductsCLI implements Callable<Integer> {
     CommandSpec spec;
 
     @Option(names = {"-a", "--all"}, description = "list all products")
-    private boolean listAll  = true;
+    private Boolean listAll = true;
 
-    @Option(names = {"-l", "--limit"}, description = "list all products")
-    private int limit = 5;
+    @Option(names = {"-i", "--inventory"}, description = "add an inventory count to result")
+    private Boolean useInventory = true;
+
+    @Option(names = {"-n"}, description = "Count of results")
+    private Integer count = -1;
+
+    @Option(names = {"-p", "--pretty"}, description = "Return pretty results")
+    private Boolean isPretty = false;
+
+    @Option(names = {"-d", "--describe"}, description = "Get a possibly AI gen description")
+    private Boolean getDescription = false;
+
+
+    @Option( names = {"-s", "--start"}, description = "Range Start")
+    private Integer start = -1;
+
+    @Option( names = {"-e", "--end"}, description = "Range End")
+    private Integer end = -1;
+
+    @Parameters(index = "0", description = "The product ID", defaultValue = "-1")
+    private Integer id;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
+
+        if (listAll) {
+
+        }
+
+        if (id==-1) {
+
+        }
+
+        if (useInventory) {
+
+        }
+
+        if (isPretty) {
+
+        }
+
+        if (count > -1) {
+
+        }
+
+        if (start>0 && end>0) {
+
+        }
+
+        if (getDescription) {
+
+        }
+
+        if (isPretty) {
+
+        }
 
         return 0;
     }

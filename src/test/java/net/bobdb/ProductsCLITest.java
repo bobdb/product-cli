@@ -18,9 +18,13 @@ class ProductsCLITest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int exitCode = cmd.execute("--all --limit 10");
+        int exitCode = cmd.execute();
         assertEquals(0, exitCode);
-        assertEquals("[{}]",sw.toString().trim());
+        assertEquals("",sw.toString().trim());
+
+        String[] args = {"-h"};
+        exitCode = cmd.execute(args);
+        assertEquals(0, exitCode);
 
     }
 

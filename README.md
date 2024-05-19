@@ -13,7 +13,8 @@
    - products K
 6. generate a description for a model by name NAME
    - products -d "NAME"
-7.  generate a list of descriptions for a set of models
+7.  generate a list of descriptions for a set of models; range in [S,E]
+   - products -d -sS -eE
 
 
 batch generation is going to use some basic ChatGPT stuff.  Figuring it out as I go...
