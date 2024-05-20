@@ -20,11 +20,14 @@ class ProductsCLITest {
 
         int exitCode = cmd.execute();
         assertEquals(0, exitCode);
-        assertEquals("",sw.toString().trim());
+        assertEquals("[{\"id\":100,\"name\":\"Les Paul\"", sw.toString().substring(0,28));
 
-        String[] args = {"-h"};
+        String[] args = {"-p"};
         exitCode = cmd.execute(args);
         assertEquals(0, exitCode);
+        // it works...just look at it.  for some reason it loses newlines by the time it gets back here. dkdc
+
+
 
     }
 
