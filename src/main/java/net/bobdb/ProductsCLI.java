@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.InvalidPropertiesFormatException;
 import java.util.concurrent.Callable;
 
 @Command(name = "products", mixinStandardHelpOptions = true, version = "checksum 4.0",
@@ -24,7 +25,7 @@ class ProductsCLI implements Callable<Integer> {
     CommandSpec spec;
 
     @Option(names = {"-a", "--all"}, description = "list all products")
-    private Boolean listAll = true;
+    private Boolean listAll = false;
 
     @Option(names = {"-i", "--inventory"}, description = "add an inventory count to result")
     private Boolean useInventory = true;
@@ -63,19 +64,21 @@ class ProductsCLI implements Callable<Integer> {
             HttpClient client = HttpClient.newHttpClient();
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             responseString = response.body();
-        }
-
-        if (isPretty) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement je = JsonParser.parseString(responseString);
-            String prettyResponse = gson.toJson(je);
-            spec.commandLine().getOut().printf(prettyResponse);
-            System.out.println(prettyResponse);
-
         } else {
-            spec.commandLine().getOut().printf(responseString);
-            System.out.println(responseString);
+            if (id>0) {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8080/api/products/" + id))
+                        .GET()
+                        .build();
+                HttpClient client = HttpClient.newHttpClient();
+                var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                responseString = response.body();
+            } else {
+                throw new InvalidPropertiesFormatException("id has to be > 0. id=" + id );
+            }
         }
+
+
 
         if (id==-1) {
 
@@ -100,7 +103,14 @@ class ProductsCLI implements Callable<Integer> {
         }
 
         if (isPretty) {
-
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement je = JsonParser.parseString(responseString);
+            String prettyResponse = gson.toJson(je);
+            spec.commandLine().getOut().printf(prettyResponse);
+            System.out.println(prettyResponse);
+        } else {
+            spec.commandLine().getOut().printf(responseString);
+            System.out.println(responseString);
         }
 
         return 0;
