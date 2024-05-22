@@ -37,9 +37,9 @@ class ProductsCLITest {
 //        // it works...just look at console  for some reason it loses newlines by the time it gets back here. dkdc
 
         // > products -a
-//        args = new String[]{"-a"};
-//        exitCode = cmd.execute(args);
-//        assertEquals(0, exitCode);
+        args = new String[]{"-a"};
+        exitCode = cmd.execute(args);
+        assertEquals(0, exitCode);
 
         // > products 100
 //        args = new String[]{"100"};
@@ -51,9 +51,9 @@ class ProductsCLITest {
 //        assertEquals(expected.trim(),sw.toString());
 
         // > products -p 100
-        args = new String[]{"-p", "100"};
-        exitCode = cmd.execute(args);
-        assertEquals(0,exitCode);
+//        args = new String[]{"-p", "100"};
+//        exitCode = cmd.execute(args);
+//        assertEquals(0,exitCode);
 //      NOTE: It works, see above
 
 

@@ -1,25 +1,31 @@
 package net.bobdb;
 
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(name = "products", mixinStandardHelpOptions = true, version = "checksum 4.0",
         description = "Do some stuff with the products API ")
 class ProductsCLI implements Callable<Integer> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductsCLI.class);
 
     @Spec
     CommandSpec spec;
@@ -52,9 +58,10 @@ class ProductsCLI implements Callable<Integer> {
     private static final String API_KEY="{key}}";
 
     @Override
-    public Integer call() throws IOException, InterruptedException {
+    public Integer call() throws Exception {
 
         String responseString = "";
+        List<Product> products = new ArrayList<>();
 
         if (listAll) {
             HttpRequest request = HttpRequest.newBuilder()
@@ -64,6 +71,24 @@ class ProductsCLI implements Callable<Integer> {
             HttpClient client = HttpClient.newHttpClient();
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             responseString = response.body();
+            Gson gson = new Gson(); // Or use new GsonBuilder().create();
+            Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
+            products = gson.fromJson(responseString, listOfProductObject);
+
+            for(Product p : products) {
+                HttpRequest inventoryRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8080/api/inventory/" + p.getId()))
+                        .GET()
+                        .build();
+                var inventoryResponse = client.send(inventoryRequest, HttpResponse.BodyHandlers.ofString());
+                if (inventoryResponse.statusCode()!=200) {
+                    LOGGER.info("modelId " + p.getId() + " not found in inventory");
+                }
+                var inventoryItem = gson.fromJson(inventoryResponse.body(), InventoryItem.class);
+                int q = inventoryItem.quantity();
+                p.setQuantity(q);
+            }
+
         } else {
             if (id>0) {
                 HttpRequest request = HttpRequest.newBuilder()
@@ -73,6 +98,9 @@ class ProductsCLI implements Callable<Integer> {
                 HttpClient client = HttpClient.newHttpClient();
                 var response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 responseString = response.body();
+                if (useInventory) {
+
+                }
             } else {
                 throw new InvalidPropertiesFormatException("id has to be > 0. id=" + id );
             }
@@ -80,13 +108,6 @@ class ProductsCLI implements Callable<Integer> {
 
 
 
-        if (id==-1) {
-
-        }
-
-        if (useInventory) {
-
-        }
 
 
 
