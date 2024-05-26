@@ -37,7 +37,17 @@ class ProductsCLITest {
 //        // it works...just look at console  for some reason it loses newlines by the time it gets back here. dkdc
 
         // > products -a
-        args = new String[]{"-a"};
+//        args = new String[]{"-a"};
+//        exitCode = cmd.execute(args);
+//        assertEquals(0, exitCode);
+
+        // > products -ap
+//        args = new String[]{"-a","-p"};
+//        exitCode = cmd.execute(args);
+//        assertEquals(0, exitCode);
+
+        // > products -l 3
+        args = new String[]{"-a", "-p", "-l","3"};
         exitCode = cmd.execute(args);
         assertEquals(0, exitCode);
 
