@@ -10,7 +10,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -53,6 +52,9 @@ class ProductsCLI implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
 
+        if (id==-1) {
+            listAll=true;
+        }
 
         //URL
         String urlString = "http://localhost:8080/api/products";
@@ -79,8 +81,15 @@ class ProductsCLI implements Callable<Integer> {
             gson = new GsonBuilder().setPrettyPrinting().create();
         else
             gson = new Gson();
-        Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
-        List<Product> products = gson.fromJson(responseString, listOfProductObject);
+
+        List<Product> products = new ArrayList<>();
+        if (listAll) {
+            Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
+            products = gson.fromJson(responseString, listOfProductObject);
+        } else {
+            Product p = gson.fromJson(responseString,Product.class);
+            products.add(p);
+        }
 
         if (useInventory) {
             for (Product p : products) {
@@ -95,6 +104,10 @@ class ProductsCLI implements Callable<Integer> {
                 var inventoryItem = gson.fromJson(inventoryResponse.body(), InventoryItem.class);
                 int q = inventoryItem.quantity();
                 p.setQuantity(q);
+            }
+        } else {
+            for (Product p : products) {
+                p.setQuantity(null);
             }
         }
 

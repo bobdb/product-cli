@@ -7,13 +7,13 @@ public class Product {
     String manufacturer;
     String year;
     String price;
-    public int quantity;
+    public Integer quantity;
 
     public int getId() {
         return id;
     }
 
-    public void setQuantity(int q) {
+    public void setQuantity(Integer q) {
         this.quantity = q;
     }
 }
