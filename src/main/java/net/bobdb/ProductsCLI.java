@@ -36,7 +36,7 @@ class ProductsCLI implements Callable<Integer> {
     @Option(names = {"-i", "--inventory"}, description = "add an inventory count to result")
     private Boolean useInventory = true;
 
-    @Option(names = {"-n"}, description = "Count of results")
+    @Option(names = {"-l"}, description = "Limit number of results")
     private Integer count = -1;
 
     @Option(names = {"-p", "--pretty"}, description = "Return pretty results")
@@ -44,13 +44,6 @@ class ProductsCLI implements Callable<Integer> {
 
     @Option(names = {"-d", "--describe"}, description = "Get a possibly AI gen description")
     private Boolean getDescription = false;
-
-
-    @Option( names = {"-s", "--start"}, description = "Range Start")
-    private Integer start = -1;
-
-    @Option( names = {"-e", "--end"}, description = "Range End")
-    private Integer end = -1;
 
     @Parameters(index = "0", description = "The product ID", defaultValue = "-1")
     private Integer id;
@@ -60,79 +53,67 @@ class ProductsCLI implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
 
-        String responseString = "";
-        List<Product> products = new ArrayList<>();
 
-        if (listAll) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/products"))
-                    .GET()
-                    .build();
-            HttpClient client = HttpClient.newHttpClient();
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            responseString = response.body();
-            Gson gson = new Gson(); // Or use new GsonBuilder().create();
-            Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
-            products = gson.fromJson(responseString, listOfProductObject);
+        //URL
+        String urlString = "http://localhost:8080/api/products";
 
-            for(Product p : products) {
+        if (!listAll) {
+            if (id>0){
+                urlString = "http://localhost:8080/api/products/" + id;
+            } else {
+                throw new InvalidPropertiesFormatException("id has to be > 0. id=" + id );
+            }
+        }
+
+        // Request
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(urlString))
+                .GET()
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseString = response.body();
+
+        Gson gson;
+        if (isPretty)
+            gson = new GsonBuilder().setPrettyPrinting().create();
+        else
+            gson = new Gson();
+        Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
+        List<Product> products = gson.fromJson(responseString, listOfProductObject);
+
+        if (useInventory) {
+            for (Product p : products) {
                 HttpRequest inventoryRequest = HttpRequest.newBuilder()
                         .uri(URI.create("http://localhost:8080/api/inventory/" + p.getId()))
                         .GET()
                         .build();
                 var inventoryResponse = client.send(inventoryRequest, HttpResponse.BodyHandlers.ofString());
-                if (inventoryResponse.statusCode()!=200) {
+                if (inventoryResponse.statusCode() != 200) {
                     LOGGER.info("modelId " + p.getId() + " not found in inventory");
                 }
                 var inventoryItem = gson.fromJson(inventoryResponse.body(), InventoryItem.class);
                 int q = inventoryItem.quantity();
                 p.setQuantity(q);
             }
+        }
 
-        } else {
-            if (id>0) {
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8080/api/products/" + id))
-                        .GET()
-                        .build();
-                HttpClient client = HttpClient.newHttpClient();
-                var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                responseString = response.body();
-                if (useInventory) {
+        if (count > 0) {
+            products = products.stream().limit(count).toList();
+        }
 
-                }
-            } else {
-                throw new InvalidPropertiesFormatException("id has to be > 0. id=" + id );
+
+        if (getDescription) {
+            for (Product p : products) {
+                DescriptionService.getDescription(p);
             }
         }
 
-
-
-
-
-
-        if (count > -1) {
-
-        }
-
-        if (start>0 && end>0) {
-
-        }
-
-        if (getDescription) {
-
-        }
-
-        if (isPretty) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement je = JsonParser.parseString(responseString);
-            String prettyResponse = gson.toJson(je);
-            spec.commandLine().getOut().printf(prettyResponse);
-            System.out.println(prettyResponse);
-        } else {
-            spec.commandLine().getOut().printf(responseString);
-            System.out.println(responseString);
-        }
+        // json text output
+        JsonElement je = gson.toJsonTree(products);
+        String responseJson = gson.toJson(je);
+        spec.commandLine().getOut().printf(responseJson);
+        System.out.println(responseJson);
 
         return 0;
     }

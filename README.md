@@ -8,14 +8,11 @@
 3. list all models pretty
    - products -ap
 4. list first N models
-   - products -nN
+   - products -l=N
 5. list a model by id K
    - products K
 6. generate a description for a model by name NAME
    - products -d "NAME"
-7.  generate a list of descriptions for a set of models; range in [S,E]
-   - products -d -sS -eE
-
 
 batch generation is going to use some basic ChatGPT stuff.  Figuring it out as I go...
 
