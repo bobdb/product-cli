@@ -16,4 +16,8 @@ public class Product {
     public void setQuantity(Integer q) {
         this.quantity = q;
     }
+
+    public void setDescription(String description) {
+        this.description=description;
+    }
 }

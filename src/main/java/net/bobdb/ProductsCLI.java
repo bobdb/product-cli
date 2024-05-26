@@ -118,7 +118,7 @@ class ProductsCLI implements Callable<Integer> {
 
         if (getDescription) {
             for (Product p : products) {
-                DescriptionService.getDescription(p);
+                p.setDescription(DescriptionService.getDescription(p));
             }
         }
 

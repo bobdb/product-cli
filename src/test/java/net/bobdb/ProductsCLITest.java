@@ -119,4 +119,20 @@ class ProductsCLITest {
         assertEquals(expected.trim(),sw.toString());
     }
 
+    @Test
+    void testFindAndGetDescription() {
+        int exitCode = -1;
+        String[] args = {""};
+        String expected = "";
+
+        System.out.println("products -d 100");
+        args = new String[]{"-d","100"};
+        exitCode = cmd.execute(args);
+        assertEquals(0,exitCode);
+        expected = """
+                        [{"id":100,"name":"Les Paul","description":"{description}","manufacturer":"Gibson","year":"1960","price":"10000.00","quantity":10}]
+                   """;
+        assertEquals(expected.trim(),sw.toString());
+    }
+
 }
