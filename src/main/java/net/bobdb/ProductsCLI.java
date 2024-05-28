@@ -47,7 +47,7 @@ class ProductsCLI implements Callable<Integer> {
     @Parameters(index = "0", description = "The product ID", defaultValue = "-1")
     private Integer id;
 
-    private static final String API_KEY="{key}}";
+    private static final String API_KEY="{key}";
 
     @Override
     public Integer call() throws Exception {

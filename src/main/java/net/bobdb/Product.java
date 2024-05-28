@@ -1,23 +1,16 @@
 package net.bobdb;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class Product {
-    public Integer id;
+    Integer id;
     String name;
     String description;
     String manufacturer;
     String year;
     String price;
-    public Integer quantity;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setQuantity(Integer q) {
-        this.quantity = q;
-    }
-
-    public void setDescription(String description) {
-        this.description=description;
-    }
+    Integer quantity;
 }
