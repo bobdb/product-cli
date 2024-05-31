@@ -33,24 +33,20 @@ class ProductsCLITest {
         System.out.println("products");
         int exitCode = cmd.execute();
         assertEquals(0, exitCode);
-        Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
-        Gson gson = new Gson();
-        List<Product> products = gson.fromJson(sw.toString(), listOfProductObject);
-        assertEquals(72, products.size());   // TODO should redirect to --help
     }
 
     @Test
     void testPrettyPrint() {
-        System.out.println("products -p");
-        String[] args = new String[]{"-p"};
+        System.out.println("products -p 1");
+        String[] args = new String[]{"-p","1"};
         int exitCode = cmd.execute(args);
         assertEquals(0, exitCode); // it works...just look at console.
     }
 
     @Test
     void testFindAll() {
-        System.out.println("products -a");
-        String[] args = {"-a"};
+        System.out.println("products -a -p");
+        String[] args = {"-a", "-p"};
         int exitCode = cmd.execute(args);
         assertEquals(0, exitCode);
 
@@ -70,38 +66,47 @@ class ProductsCLITest {
 
     @Test
     void testFindSingle() {
-        System.out.println("products 100");
-        String[] args = new String[]{"100"};
+        System.out.println("products 1");
+        String[] args = new String[]{"1"};
         int exitCode = cmd.execute(args);
         assertEquals(0,exitCode);
         String expected = """
-                        [{"id":100,"name":"Les Paul","description":"","manufacturer":"Gibson","year":"1960","price":"10000.00","quantity":10}]
+                        [{"id":1,"name":"Les Paul","description":"","manufacturer":"Gibson","year":"1960","price":"10000.00","quantity":0}]
                 """;
         assertEquals(expected.trim(),sw.toString());
     }
 
     @Test
     void testFindWithoutHittingInventoryService() {
-        System.out.println("products -i=false 100");
-        String[] args = new String[]{"-i=false","100"};
+        System.out.println("products -i=false 1");
+        String[] args = new String[]{"-i=false","1"};
         int exitCode = cmd.execute(args);
         assertEquals(0,exitCode);
         String expected = """
-                        [{"id":100,"name":"Les Paul","description":"","manufacturer":"Gibson","year":"1960","price":"10000.00"}]
+                        [{"id":1,"name":"Les Paul","description":"","manufacturer":"Gibson","year":"1960","price":"10000.00"}]
                    """;
         assertEquals(expected.trim(),sw.toString());
     }
 
     @Test
     void testFindAndGetDescription() {
-        System.out.println("products -d 100");
-        String[] args = new String[]{"-d","100"};
+        System.out.println("products -d 1");
+        String[] args = new String[]{"-d","1"};
         int exitCode = cmd.execute(args);
         assertEquals(0,exitCode);
-        String expected = """
-                        [{"id":100,"name":"Les Paul","description":"{description}","manufacturer":"Gibson","year":"1960","price":"10000.00","quantity":10}]
-                   """;
-        assertEquals(expected.trim(),sw.toString());
+        Gson gson = new Gson();
+        Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
+        List<Product> productList = gson.fromJson(sw.toString(), listOfProductObject);
+        Product p = productList.get(0);
+        assertEquals(p.getId(),1);
+        assertEquals(p.getName(),"Les Paul");
+        assertEquals(p.getManufacturer(),"Gibson");
+        assertEquals(p.getYear(),"1960");
+        assertEquals(p.getPrice(),"10000.00");
+        assertNotEquals(p.getDescription(),"");
+
+
+
     }
 
 }

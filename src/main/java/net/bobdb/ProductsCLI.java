@@ -8,8 +8,6 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,7 +22,7 @@ import java.util.concurrent.Callable;
         description = "Do some stuff with the products API ")
 class ProductsCLI implements Callable<Integer> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProductsCLI.class);
+  //  private static final Logger LOGGER = LoggerFactory.getLogger(ProductsCLI.class);
 
     @Spec
     CommandSpec spec;
@@ -52,6 +50,10 @@ class ProductsCLI implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
 
+        if (listAll==false && id==-1) {
+            System.out.println("type help for usage");
+            return 0;
+        }
         if (id==-1) {
             listAll=true;
         }
@@ -99,7 +101,7 @@ class ProductsCLI implements Callable<Integer> {
                         .build();
                 var inventoryResponse = client.send(inventoryRequest, HttpResponse.BodyHandlers.ofString());
                 if (inventoryResponse.statusCode() != 200) {
-                    LOGGER.info("modelId " + p.getId() + " not found in inventory");
+                   // LOGGER.info("modelId " + p.getId() + " not found in inventory");
                 }
                 var inventoryItem = gson.fromJson(inventoryResponse.body(), InventoryItem.class);
                 int q = inventoryItem.quantity();
@@ -118,7 +120,12 @@ class ProductsCLI implements Callable<Integer> {
 
         if (getDescription) {
             for (Product p : products) {
-                p.setDescription(DescriptionService.getDescription(p));
+                if (p.getDescription().isBlank()){
+                    p.setDescription(DescriptionService.getDescription(p));
+                } else {
+                    System.out.println("Description already exists");
+                }
+
             }
         }
 
