@@ -6,13 +6,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class ProductsCLITest {
 
@@ -49,7 +55,6 @@ class ProductsCLITest {
         String[] args = {"-a", "-p"};
         int exitCode = cmd.execute(args);
         assertEquals(0, exitCode);
-
         Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
         Gson gson = new Gson();
         List<Product> products = gson.fromJson(sw.toString(), listOfProductObject);
@@ -77,6 +82,20 @@ class ProductsCLITest {
     }
 
     @Test
+    void testProductServiceUp() throws IOException, InterruptedException {
+        String urlString = "http://localhost:8080/api/products/1";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(urlString))
+                .GET()
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseString = response.body();
+        assertThat(responseString.substring(0,12)).isNotEqualTo("{\"timestamp\"");
+    }
+
+
+    @Test
     void testFindWithoutHittingInventoryService() {
         System.out.println("products -i=false 1");
         String[] args = new String[]{"-i=false","1"};
@@ -90,6 +109,8 @@ class ProductsCLITest {
 
     @Test
     void testFindAndGetDescription() {
+
+        // Item 1 already has a description
         System.out.println("products -d 1");
         String[] args = new String[]{"-d","1"};
         int exitCode = cmd.execute(args);
@@ -104,9 +125,6 @@ class ProductsCLITest {
         assertEquals(p.getYear(),"1960");
         assertEquals(p.getPrice(),"10000.00");
         assertNotEquals(p.getDescription(),"");
-
-
-
     }
 
 }
