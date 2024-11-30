@@ -18,3 +18,4 @@ batch generation is going to use some basic ChatGPT stuff.  Figuring it out as I
 
    ### Changelog
    - 0.0.1 not even tagged yet
+   - sc
